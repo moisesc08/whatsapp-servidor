@@ -31,13 +31,8 @@ app.get('/api/mensajes', async (req, res) => {
   try {
     const { data, error } = await supabase
       .from('mensajes')
-      .select(`
-        id,
-        contenido,
-        timestamp,
-        usuarios ( telefono, nombre )
-      `)
-      .order('timestamp', { ascending: false })
+      .select('id, telefono, mensaje, fecha_hora')
+      .order('fecha_hora', { ascending: false })
       .limit(100);
 
     if (error) throw error;

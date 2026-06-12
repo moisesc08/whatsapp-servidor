@@ -30,37 +30,34 @@
   </table>
 
   <script>
-    async function cargarMensajes() {
-      try {
-        const res = await fetch('/api/mensajes');
-        const mensajes = await res.json();
-        const tbody = document.getElementById('mensajes-body');
-        tbody.innerHTML = '';
+  async function cargarMensajes() {
+    try {
+      const res = await fetch('/api/mensajes');
+      const mensajes = await res.json();
+      const tbody = document.getElementById('mensajes-body');
+      tbody.innerHTML = '';
 
-        mensajes.forEach(m => {
-          const tr = document.createElement('tr');
-          const nombre = m.usuarios?.nombre || '-';
-          const telefono = m.usuarios?.telefono || '-';
-          const fecha = new Date(m.timestamp).toLocaleString('es-MX');
+      mensajes.forEach(m => {
+        const tr = document.createElement('tr');
+        const fecha = new Date(m.fecha_hora).toLocaleString('es-MX');
 
-          tr.innerHTML = `
-            <td>${nombre}</td>
-            <td>${telefono}</td>
-            <td>${m.contenido}</td>
-            <td class="timestamp">${fecha}</td>
-          `;
-          tbody.appendChild(tr);
-        });
+        tr.innerHTML = `
+          <td>${m.telefono}</td>
+          <td>${m.mensaje}</td>
+          <td class="timestamp">${fecha}</td>
+        `;
+        tbody.appendChild(tr);
+      });
 
-        document.getElementById('status').textContent =
-          `Última actualización: ${new Date().toLocaleTimeString('es-MX')} (${mensajes.length} mensajes)`;
-      } catch (err) {
-        document.getElementById('status').textContent = 'Error al cargar mensajes';
-      }
+      document.getElementById('status').textContent =
+        `Última actualización: ${new Date().toLocaleTimeString('es-MX')} (${mensajes.length} mensajes)`;
+    } catch (err) {
+      document.getElementById('status').textContent = 'Error al cargar mensajes';
     }
+  }
 
-    cargarMensajes();
-    setInterval(cargarMensajes, 5000); // refresca cada 5 segundos
-  </script>
+  cargarMensajes();
+  setInterval(cargarMensajes, 5000);
+</script>
 </body>
 </html>
