@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Panel de Mensajes - Noumi</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+    h1 { color: #333; }
+    table { width: 100%; border-collapse: collapse; background: white; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #eee; }
+    th { background: #25D366; color: white; }
+    tr:hover { background: #f9f9f9; }
+    .timestamp { color: #888; font-size: 0.85em; white-space: nowrap; }
+    #status { color: #888; font-size: 0.85em; margin-bottom: 10px; }
+  </style>
+</head>
+<body>
+  <h1>Panel de Mensajes WhatsApp</h1>
+  <div id="status">Cargando...</div>
+  <table>
+    <thead>
+      <tr>
+        <th>Nombre</th>
+        <th>Teléfono</th>
+        <th>Mensaje</th>
+        <th>Fecha</th>
+      </tr>
+    </thead>
+    <tbody id="mensajes-body"></tbody>
+  </table>
+
+  <script>
+    async function cargarMensajes() {
+      try {
+        const res = await fetch('/api/mensajes');
+        const mensajes = await res.json();
+        const tbody = document.getElementById('mensajes-body');
+        tbody.innerHTML = '';
+
+        mensajes.forEach(m => {
+          const tr = document.createElement('tr');
+          const nombre = m.usuarios?.nombre || '-';
+          const telefono = m.usuarios?.telefono || '-';
+          const fecha = new Date(m.timestamp).toLocaleString('es-MX');
+
+          tr.innerHTML = `
+            <td>${nombre}</td>
+            <td>${telefono}</td>
+            <td>${m.contenido}</td>
+            <td class="timestamp">${fecha}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+
+        document.getElementById('status').textContent =
+          `Última actualización: ${new Date().toLocaleTimeString('es-MX')} (${mensajes.length} mensajes)`;
+      } catch (err) {
+        document.getElementById('status').textContent = 'Error al cargar mensajes';
+      }
+    }
+
+    cargarMensajes();
+    setInterval(cargarMensajes, 5000); // refresca cada 5 segundos
+  </script>
+</body>
+</html>

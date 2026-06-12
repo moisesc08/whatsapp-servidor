@@ -4,7 +4,6 @@ const { createClient } = require('@supabase/supabase-js');
 
 const app = express();
 app.use(express.json());
-
 // --- Supabase client ---
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -27,7 +26,29 @@ app.get('/webhook', (req, res) => {
     res.sendStatus(403);
   }
 });
+// GET /api/mensajes - returns latest messages with sender info
+app.get('/api/mensajes', async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from('mensajes')
+      .select(`
+        id,
+        contenido,
+        timestamp,
+        usuarios ( telefono, nombre )
+      `)
+      .order('timestamp', { ascending: false })
+      .limit(100);
 
+    if (error) throw error;
+    res.json(data);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Error al obtener mensajes' });
+  }
+});
+const path = require('path');
+app.use(express.static(path.join(__dirname, 'public')));
 // =============================================
 // PASO 5-12: Receive and save messages
 // =============================================
