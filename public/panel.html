@@ -1,62 +1,241 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Panel de Mensajes - Noumi</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NOUmi · Panel de Mensajes</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <style>
-    body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
-    h1 { color: #333; }
-    table { width: 100%; border-collapse: collapse; background: white; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-    th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #eee; }
-    th { background: #25D366; color: white; }
-    tr:hover { background: #f9f9f9; }
-    .timestamp { color: #888; font-size: 0.85em; white-space: nowrap; }
-    #status { color: #888; font-size: 0.85em; margin-bottom: 10px; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --purple:       #5B4E9E;
+      --purple-dark:  #2D2566;
+      --purple-mid:   #9088C0;
+      --purple-light: #EDE8FF;
+      --purple-ghost: #F9F8FF;
+      --purple-hover: #F4F1FF;
+      --yellow:       #F0D030;
+      --yellow-dark:  #3D3370;
+      --border:       #EAE6FA;
+      --border-mid:   #DDD8F0;
+      --white:        #FFFFFF;
+      --text:         #2D2566;
+      --text-muted:   #9088C0;
+      --text-faint:   #B8B0D8;
+      --green-dot:    #7DC87A;
+    }
+    html, body { height: 100%; }
+    body { font-family: 'Inter', system-ui, sans-serif; background: var(--purple-ghost); color: var(--text); min-height: 100vh; }
+
+    nav {
+      background: var(--white);
+      border-bottom: 1.5px solid var(--border);
+      padding: 12px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky; top: 0; z-index: 10;
+    }
+    .nav-left { display: flex; align-items: center; gap: 14px; }
+    .nav-logo { height: 44px; width: auto; display: block; }
+    .nav-divider { width: 1.5px; height: 28px; background: var(--border); }
+    .nav-subtitle { font-size: 13px; font-weight: 500; color: var(--text-muted); }
+    .nav-right { display: flex; align-items: center; gap: 14px; }
+    .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--green-dot); margin-right: 5px; animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.35} }
+    .status-txt { font-size: 12px; color: var(--text-muted); }
+    .nav-tag { background: var(--yellow); color: var(--yellow-dark); font-size: 11px; font-weight: 800; padding: 5px 14px; border-radius: 20px; }
+
+    main { max-width: 1100px; margin: 0 auto; padding: 28px 24px 48px; }
+
+    .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 24px; }
+    .stat { background: var(--white); border: 1.5px solid var(--border); border-top: 4px solid var(--purple); border-radius: 12px; padding: 18px 22px; }
+    .stat-label { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 6px; }
+    .stat-val { font-size: 32px; font-weight: 800; color: var(--purple); line-height: 1; }
+    .stat-val.sm { font-size: 18px; padding-top: 5px; }
+    .stat-hint { font-size: 12px; color: var(--text-faint); margin-top: 5px; }
+
+    .toolbar { display: flex; gap: 10px; align-items: center; margin-bottom: 12px; flex-wrap: wrap; }
+    .search-wrap { position: relative; flex: 1; min-width: 220px; }
+    .search-wrap svg { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); pointer-events: none; }
+    input[type="text"] { width: 100%; background: var(--white); border: 1.5px solid var(--border-mid); border-radius: 9px; padding: 9px 14px 9px 38px; font-size: 14px; font-family: inherit; color: var(--text); outline: none; }
+    input[type="text"]::placeholder { color: var(--text-faint); }
+    input[type="text"]:focus { border-color: var(--purple); }
+    select { background: var(--white); border: 1.5px solid var(--border-mid); border-radius: 9px; padding: 9px 12px; font-size: 14px; font-family: inherit; color: var(--text); outline: none; cursor: pointer; }
+    select:focus { border-color: var(--purple); }
+    .toolbar-label { font-size: 13px; color: var(--text-muted); white-space: nowrap; }
+    button { background: var(--yellow); color: var(--yellow-dark); border: none; border-radius: 9px; padding: 9px 18px; font-size: 13px; font-weight: 700; font-family: inherit; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+    button:hover { background: #E8C820; }
+
+    .table-card { background: var(--white); border: 1.5px solid var(--border); border-radius: 12px; overflow: hidden; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    thead tr { background: var(--purple); }
+    thead th { padding: 13px 18px; text-align: left; font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.85); text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; }
+    tbody tr { border-bottom: 1px solid var(--border); transition: background 0.1s; }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: var(--purple-hover); }
+    tbody tr.alt { background: #FDFCFF; }
+    tbody tr.alt:hover { background: var(--purple-hover); }
+    td { padding: 12px 18px; vertical-align: middle; }
+    .col-num { color: var(--text-faint); font-weight: 700; font-size: 12px; width: 50px; }
+    .col-phone { font-weight: 700; color: var(--purple); white-space: nowrap; }
+    .col-msg { color: var(--text); max-width: 400px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .col-date { color: var(--text-muted); font-size: 13px; white-space: nowrap; }
+    .col-time { background: var(--purple-light); color: var(--purple); font-size: 11px; font-weight: 700; padding: 4px 11px; border-radius: 20px; white-space: nowrap; display: inline-block; }
+
+    .empty-cell { text-align: center; padding: 50px 16px !important; color: var(--text-muted); font-size: 14px; }
+    .spinner { width: 28px; height: 28px; border: 3px solid var(--border); border-top-color: var(--purple); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 12px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .error-box { background: #FFF5F5; border: 1.5px solid #F0C8C8; color: #800; border-radius: 9px; padding: 12px 18px; font-size: 13px; margin-bottom: 14px; }
+
+    .footer { display: flex; justify-content: space-between; align-items: center; padding-top: 12px; font-size: 12px; color: var(--text-faint); }
+
+    @media (max-width: 640px) {
+      main { padding: 16px 12px 32px; }
+      nav { padding: 10px 16px; }
+      .nav-logo { height: 36px; }
+      .stats { grid-template-columns: 1fr 1fr; }
+      .stats .stat:last-child { grid-column: span 2; }
+      .stat-val { font-size: 26px; }
+      .col-msg { max-width: 140px; }
+    }
   </style>
 </head>
 <body>
-  <h1>Panel de Mensajes WhatsApp</h1>
-  <div id="status">Cargando...</div>
-  <table>
-    <thead>
-  <tr>
-    <th>Teléfono</th>
-    <th>Mensaje</th>
-    <th>Fecha</th>
-  </tr>
-</thead>
-    <tbody id="mensajes-body"></tbody>
-  </table>
 
-  <script>
-  async function cargarMensajes() {
+<nav>
+  <div class="nav-left">
+    <img src="data:image/png;base64,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" alt="NOUmi" class="nav-logo" />
+    <div class="nav-divider"></div>
+    <span class="nav-subtitle">Panel de Mensajes</span>
+  </div>
+  <div class="nav-right">
+    <span class="status-txt"><span class="dot"></span><span id="last-update">Conectando…</span></span>
+    <span class="nav-tag">NOUMI.MX</span>
+  </div>
+</nav>
+
+<main>
+  <div id="error-area"></div>
+
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-label">Total mensajes</div>
+      <div class="stat-val" id="stat-total">—</div>
+      <div class="stat-hint">en la base de datos</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Contactos únicos</div>
+      <div class="stat-val" id="stat-contacts">—</div>
+      <div class="stat-hint">números distintos</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Último mensaje</div>
+      <div class="stat-val sm" id="stat-latest">—</div>
+      <div class="stat-hint" id="stat-latest-date">—</div>
+    </div>
+  </div>
+
+  <div class="toolbar">
+    <div class="search-wrap">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#B8B0D8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="search" placeholder="Buscar por teléfono o mensaje…" />
+    </div>
+    <span class="toolbar-label">Ordenar:</span>
+    <select id="sort-sel">
+      <option value="desc">Más reciente primero</option>
+      <option value="asc">Más antiguo primero</option>
+    </select>
+    <button onclick="load()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+      Actualizar
+    </button>
+  </div>
+
+  <div class="table-card">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Teléfono</th>
+          <th>Mensaje</th>
+          <th>Fecha</th>
+          <th>Hora</th>
+        </tr>
+      </thead>
+      <tbody id="tbody">
+        <tr><td colspan="5" class="empty-cell"><div class="spinner"></div>Cargando mensajes…</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="footer">
+    <span id="row-count"></span>
+    <span>noumi.mx · NOUMI.MX S.A. de C.V.</span>
+  </div>
+</main>
+
+<script>
+  // ── Fetches from your own /api/mensajes route — no keys needed here ──
+  const fmtP    = p => { const s=String(p).replace(/\D/g,''); return s.length===13&&s.startsWith('52')?'+52 '+s.slice(2,5)+' '+s.slice(5,9)+' '+s.slice(9):p; };
+  const fmtDate = iso => new Date(iso).toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric'});
+  const fmtTime = iso => new Date(iso).toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'});
+
+  let all = [];
+
+  async function load() {
+    document.getElementById('error-area').innerHTML = '';
     try {
       const res = await fetch('/api/mensajes');
-      const mensajes = await res.json();
-      const tbody = document.getElementById('mensajes-body');
-      tbody.innerHTML = '';
-
-      mensajes.forEach(m => {
-        const tr = document.createElement('tr');
-        const fecha = new Date(m.fecha_hora).toLocaleString('es-MX');
-
-        tr.innerHTML = `
-          <td>${m.telefono}</td>
-          <td>${m.mensaje}</td>
-          <td class="timestamp">${fecha}</td>
-        `;
-        tbody.appendChild(tr);
-      });
-
-      document.getElementById('status').textContent =
-        `Última actualización: ${new Date().toLocaleTimeString('es-MX')} (${mensajes.length} mensajes)`;
-    } catch (err) {
-      document.getElementById('status').textContent = 'Error al cargar mensajes';
+      if (!res.ok) throw new Error('Error ' + res.status);
+      all = await res.json();
+      updateStats();
+      render();
+      document.getElementById('last-update').textContent = 'Actualizado ' + new Date().toLocaleTimeString('es-MX');
+    } catch(e) {
+      document.getElementById('error-area').innerHTML = '<div class="error-box">⚠️ No se pudieron cargar los mensajes: ' + e.message + '</div>';
+      document.getElementById('tbody').innerHTML = '<tr><td colspan="5" class="empty-cell">Error al cargar datos</td></tr>';
     }
   }
 
-  cargarMensajes();
-  setInterval(cargarMensajes, 5000);
+  function updateStats() {
+    document.getElementById('stat-total').textContent    = all.length;
+    document.getElementById('stat-contacts').textContent = new Set(all.map(m=>m.telefono)).size;
+    if (all.length) {
+      const l = [...all].sort((a,b)=>new Date(b.fecha_hora)-new Date(a.fecha_hora))[0];
+      document.getElementById('stat-latest').textContent      = fmtTime(l.fecha_hora);
+      document.getElementById('stat-latest-date').textContent = fmtDate(l.fecha_hora);
+    }
+  }
+
+  function render() {
+    const q   = document.getElementById('search').value.toLowerCase();
+    const dir = document.getElementById('sort-sel').value;
+    let rows  = all.filter(m => !q || fmtP(m.telefono).includes(q) || (m.mensaje||'').toLowerCase().includes(q));
+    rows.sort((a,b) => dir==='desc' ? new Date(b.fecha_hora)-new Date(a.fecha_hora) : new Date(a.fecha_hora)-new Date(b.fecha_hora));
+    const tbody = document.getElementById('tbody');
+    if (!rows.length) {
+      tbody.innerHTML = '<tr><td colspan="5" class="empty-cell">Sin resultados</td></tr>';
+    } else {
+      tbody.innerHTML = rows.map((m,i) =>
+        '<tr class="'+(i%2?'alt':'')+'">'+
+        '<td class="col-num">'+(i+1)+'</td>'+
+        '<td class="col-phone">'+fmtP(m.telefono)+'</td>'+
+        '<td class="col-msg" title="'+m.mensaje+'">'+m.mensaje+'</td>'+
+        '<td class="col-date">'+fmtDate(m.fecha_hora)+'</td>'+
+        '<td><span class="col-time">'+fmtTime(m.fecha_hora)+'</span></td>'+
+        '</tr>'
+      ).join('');
+    }
+    document.getElementById('row-count').textContent = rows.length+' mensaje'+(rows.length!==1?'s':'')+' mostrado'+(rows.length!==1?'s':'');
+  }
+
+  document.getElementById('search').addEventListener('input', render);
+  document.getElementById('sort-sel').addEventListener('change', render);
+
+  load();
+  setInterval(load, 30000);
 </script>
 </body>
 </html>
