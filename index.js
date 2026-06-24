@@ -2,6 +2,12 @@ require('dotenv').config();
 const express = require('express');
 const { createClient } = require('@supabase/supabase-js');
 
+function nowMexico() {
+  return new Date().toLocaleString('sv-SE', {
+    timeZone: 'America/Mexico_City'
+  }).replace(' ', 'T');
+}
+
 const app = express();
 app.use(express.json());
 // --- Supabase client ---
@@ -96,7 +102,7 @@ app.post('/webhook', async (req, res) => {
     if (!usuarioExistente) {
       const { error: crearError } = await supabase
         .from('usuarios')
-        .insert({ telefono, fecha_registro: new Date().toISOString() });
+        .insert({ telefono, fecha_registro: nowMexico() });
 
       if (crearError) console.error('❌ Error creando usuario:', crearError.message);
       else console.log('👤 Nuevo usuario registrado:', telefono);
@@ -107,7 +113,7 @@ app.post('/webhook', async (req, res) => {
     // --- PASO 8: Save message ---
     const { error: msgError } = await supabase
       .from('mensajes')
-      .insert({ telefono, mensaje, fecha_hora: new Date().toISOString() });
+      .insert({ telefono, mensaje, fecha_hora: nowMexico() });
 
     if (msgError) console.error('❌ Error guardando mensaje:', msgError.message);
     else console.log('✅ Mensaje guardado en Supabase');
